@@ -35,16 +35,16 @@ class Order
     // 根据订单查询真实的产品参数
     private function getProductsByOrder($oProducts)
     {
-        $oPIDs = [];
-        // 获取订单数组中的商品id
-        foreach ($oProducts as $item) {
-            array_push($oPIDs, $item['product_id']);
-        }
-        // 根据订单商品id查询数据库里的真实商品
-        $products = Product::all($oPIDs)
-            ->visible(['id', 'price', 'stock', 'name', 'main_img_url'])
-            ->toArray();
-        return $products;
+        // $oPIDs = [];
+        // // 获取订单数组中的商品id
+        // foreach ($oProducts as $item) {
+        //     array_push($oPIDs, $item['product_id']);
+        // }
+        // // 根据订单商品id查询数据库里的真实商品
+        // $products = Product::all($oPIDs)
+        //     ->visible(['id', 'price', 'stock', 'name', 'main_img_url'])
+        //     ->toArray();
+        // return $products;
     }
 
     private function getOrderStatus()
