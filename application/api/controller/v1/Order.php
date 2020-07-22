@@ -5,6 +5,7 @@ namespace app\api\controller\v1;
 
 
 use app\api\controller\BaseController;
+use app\api\service\Order as ServiceOrder;
 use app\api\Validate\OrderPlace;
 use app\api\service\Token as TokenService;
 
@@ -29,7 +30,11 @@ class Order extends BaseController
         // 验证用户提交的订单数组
         (new OrderPlace())->goCheck();
         // 获取用户提交的数据
-        $products = input('post.products/a');
+        $products = input('post.products/a'); // 获取数组参数
         $uid = TokenService::getCurrentUid();
+
+        $order = new ServiceOrder();
+        $status = $order->place($uid,$products);
+        return $status;
     }
 }
