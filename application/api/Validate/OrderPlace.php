@@ -20,9 +20,9 @@ class OrderPlace extends BaseValidate
 
     protected function checkProducts($values){
         // 必须是数组
-        if(is_array($values)){
+        if(!is_array($values)){
             throw new ParameterException([
-                'msg' => '参数不正确'
+                'msg' => '参数必须为数组'
             ]);
         }
         // 不为空

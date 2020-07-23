@@ -10,6 +10,7 @@ use app\api\model\UserAddress;
 use app\lib\exception\OrderException;
 use app\lib\exception\UserException;
 use Exception;
+use think\Db;
 
 class Order
 {
@@ -145,7 +146,7 @@ class Order
         $snap['pStatus'] = $status['pStatusArray'];
         $snap['snapAddress'] = json_encode($this->getUserAddress());
         $snap['snapName'] = $this->products[0]['name'];
-        $snap['snapImg'] = $this->products[0]['mian_img_url'];
+        $snap['snapImg'] = $this->products[0]['main_img_url'];
         if (count($this->products) > 1) {
             $snap['snapName'] .= '等';
         }
@@ -168,38 +169,42 @@ class Order
     public static function makeOrderNo()
     {
         $yCode = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J');
-        $orderSn = $yCode[intval(date('Y') - 2020) . strtoupper(dechex(date('m'))) . date('d') . substr(time(), -5) . substr(microtime(), 2, 5) . sprintf('%02d' . rand(0, 99))];
+        $orderSn =
+            $yCode[intval(date('Y')) - 2020] . strtoupper(dechex(date('m'))) . date('d') . substr(time(), -5) . substr(microtime(), 2, 5) . sprintf('%02d', rand(0, 99));
         return $orderSn;
     }
     // 创建订单
     private function createOrder($snap)
     {
+        Db::startTrans();
         try {
             $orderNo = $this->makeOrderNo();
             $order = new ModelOrder();
             $order->user_id = $this->uid;
             $order->order_no = $orderNo;
-            $order->total_price = $snap['orderPice'];
+            $order->total_price = $snap['orderPrice'];
             $order->total_count = $snap['totalCount'];
             $order->snap_img = $snap['snapImg'];
             $order->snap_name = $snap['snapName'];
             $order->snap_address = $snap['snapAddress'];
             $order->snap_items = json_encode($snap['pStatus']);
             $order->save();
-
+           
             $orderID = $order->id;
-            $create_time = $order->create_time;
+            // $create_time = $order->create_time;
             foreach ($this->oProducts as &$p) {
                 $p['order_id'] = $orderID;
             }
             $orderProduct = new OrderProduct();
             $orderProduct->saveAll($this->oProducts);
+            Db::commit();
             return [
                 'order_no' => $orderNo,
                 'order_id' => $orderID,
-                'create_time' => $create_time,
+                // 'create_time' => $create_time,
             ];
         } catch (Exception $ex) {
+            Db::rollback();
             throw $ex;
         }
     }
