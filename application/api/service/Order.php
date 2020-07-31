@@ -64,6 +64,16 @@ class Order
         }
         return $products;
     }
+
+    // 公共方法：库存量检测
+    public function checkOrderStock($orderID){
+        $oProducts = OrderProduct::where('order_id','=',$orderID)->select();
+        $this->oProducts = $oProducts;
+        $this->products = $this->getProductsByOrder($oProducts);
+        $status = $this->getOrderStatus();
+        return $status;
+    }
+
     // 获取提交订单的属性状态
     private function getOrderStatus()
     {

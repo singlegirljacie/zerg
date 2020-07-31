@@ -78,4 +78,11 @@ class Token
         }
 
     }
+
+    public static function isValidOperate($checkedUID){
+        if(!$checkedUID){
+            throw new Exception('UID不存在');
+        }
+        
+    }
 }
