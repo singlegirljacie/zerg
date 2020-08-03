@@ -25,6 +25,12 @@ class Token
         return md5($randChars.$timestamp.$salt);
     }
 
+    /**
+     * 获取缓存的令牌中某个值
+     *
+     * @param [type] $key 
+     * @return void
+     */
     public static function getCurrentTokenVar($key){
         $token = Request::instance()
             ->header('token');
@@ -79,10 +85,20 @@ class Token
 
     }
 
+    /*
+     * 是否是合法操作，是否为合法用户
+     *
+     * @param [type] $checkedUID 被检测的UID
+     * @return boolean
+     */
     public static function isValidOperate($checkedUID){
         if(!$checkedUID){
-            throw new Exception('UID不存在');
+            throw new Exception('被检测UID没有被传入');
         }
-        
+        $currentOperateUID = self::getCurrentUid();
+        if($currentOperateUID == $checkedUID){
+            return true;
+        }
+        return false;
     }
 }
