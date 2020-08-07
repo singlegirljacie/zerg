@@ -40,7 +40,7 @@ class Pay
         return $this->makeWxPreOrder($status['orderPrice']);
     }
 
-    // 封装微信预订单需要发送的参数
+    // 封装微信预订单需要发送的参数,并发送请求
     private function makeWxPreOrder($totalPrice){
         // openID微信用户身份标识
         $openid = Token::getCurrentTokenVar('openid');
@@ -60,11 +60,12 @@ class Pay
         // 设置openID
         $wxOrderData->SetOpenid($openid);
         // 设置微信回调通知的url
-        $wxOrderData->SetNotify_url('');
+        $wxOrderData->SetNotify_url(config('secure.pay_back_url'));
+        // 像微信发送请求
         return $this->getPaySignature($wxOrderData);
 
     }
-    // 像微信发送请求
+    // 向微信发送请求
     private function getPaySignature($wxOrderData){
         $config = new \WxPayConfig();
         // 接收返回结果
@@ -74,7 +75,34 @@ class Pay
             Log::record($wxOrder,'error');
             Log::record('获取预支付订单失败','error');
         }
-        return null;
+        // 处理微信返回参数prepay_id
+        $this->recordPreOrder($wxOrder);
+
+        $signature = $this->sign($wxOrder,$config);
+        return $signature;
+    }
+    // 处理微信返回参数prepay_id，存到数据库，更新操作
+    private function recordPreOrder($wxOrder){
+        OrderModel::where('id','=',$this->orderID)->update(['prepay_id'=>$wxOrder['prepay_id']]);
+    }
+    // 封装返回客户端参数，生成签名
+    private function sign($wxOrder,$config){
+        $jsApiPayData = new \WxPayJsApiPay();
+        $jsApiPayData->SetAppid(config('wx.app_id'));
+        // 支付时间戳（string）
+        $jsApiPayData->SetTimeStamp((string)time());
+        // 随机字符串
+        $rand = md5(time() . mt_rand(0,1000));
+        $jsApiPayData->SetNonceStr($rand);
+        $jsApiPayData->SetPackage('prepay_id=' . $wxOrder['prepay_id']);
+        // 签名算法
+        $jsApiPayData->SetSignType('md5');
+        // 生成签名
+        $sign = $jsApiPayData->MakeSign($config);
+        $rawValues = $jsApiPayData->GetValues();// 将$rawValues对象转数组
+        $rawValues['paySign'] = $sign;
+        unset($rawValues['appId']);// 将appid从返回数组中删除
+        return $rawValues;
     }
 
     // 情况分析

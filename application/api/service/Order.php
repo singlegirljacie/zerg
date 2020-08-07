@@ -14,10 +14,8 @@ use think\Db;
 
 class Order
 {
-    // 订单的商品列表，客户端传递过来的Products参数
-    protected $oProducts;
-    // 真实的商品信息（包括库存量）
-    protected $products;
+    protected $oProducts;// 订单的商品信息，客户端传递过来的Products参数
+    protected $products;// 真实的商品信息（包括库存量）
     protected $uid;
     /*
      * 下单主方法

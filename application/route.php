@@ -27,11 +27,13 @@ Route::group('api/:version/product',function(){
 });
 
 Route::get('api/:version/category/all','api/:version.Category/getAllCategories');
+// token请求
 Route::post('api/:version/token/user','api/:version.Token/getToken');
-
+// 地址
 Route::post('api/:version/address','api/:version.Address/createOrUpdateAddress');
-
 // 订单
 Route::post('api/:version/order','api/:version.Order/placeOrder');
 // 支付
 Route::post('api/:version/pay/pre_order','api/:version.Pay/getPreOrder');
+// 微信支付回调接口
+Route::post('api/:version/pay/notify','api/:version.Pay/receiveNotify');
