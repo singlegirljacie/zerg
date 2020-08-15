@@ -12,12 +12,14 @@ use think\Db;
 use think\Loader;
 use think\Log;
 
-Loader::import('WxPay', EXTEND_PATH, '.Api.php');
+Loader::import('WxPay.WxPay',EXTEND_PATH,'.Api.php');
 
 class WxNotify extends \WxPayNotify
 {
     public function NotifyProcess($objData, $config, &$msg)
     {
+        // return_code 通信结果
+        // result_code 支付结果
         if ($objData['result_code'] == 'SUCCESS') //支付成功
         {
             $orderNo = $objData['out_trade_no']; //订单号
